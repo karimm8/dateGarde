@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <title>جدول الحراسة الخاص بالسائقين</title>
@@ -26,7 +26,7 @@
       margin-top: 12px;
     }
     th, td {
-      border: 1px solid #ddd;
+      border: 1px solid #999;
       padding: 10px;
       text-align: center;
       font-size: 1rem;
@@ -126,7 +126,8 @@
       document.getElementById("monthLabel").textContent = monthLabel;
 
       // إيجاد أول يوم اثنين في الشهر
-      let startDate = new Date(year, month, 1);
+      let startDate = new Date(year,month, 1);
+      
       while (startDate.getDay() !== 1) startDate.setDate(startDate.getDate() + 1);
 
       // حساب عدد الأسابيع (حتى 4 فقط)
