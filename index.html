@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>جدول الحراسة الخاص بالسائقين</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: "Cairo", sans-serif;
+      background: #f3f4f6;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 20px;
+      direction: rtl;
+    }
+    table {
+      border-collapse: collapse;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      width: 95%;
+      max-width: 720px;
+      margin-top: 12px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+      font-size: 1rem;
+    }
+    th {
+      background: #2563eb;
+      color: white;
+      font-weight: 700;
+    }
+    caption {
+      caption-side: top;
+      font-weight: 800;
+      margin-bottom: 12px;
+      font-size: 1.3rem;
+      color: #1e3a8a;
+    }
+    .week-title {
+      background: #e0e7ff;
+      font-weight: bold;
+    }
+    h2 {
+      text-align: center;
+      color: #1e3a8a;
+      margin-bottom: 8px;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    button {
+      background: #2563eb;
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #1e40af;
+    }
+    #monthLabel {
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: #1e3a8a;
+    }
+  </style>
+</head>
+<body>
+
+  <div>
+    <h2>جدول الحراسة الخاص بالسائقين</h2>
+
+    <div class="controls">
+      <button id="prevBtn">◀ الشهر السابق</button>
+      <span id="monthLabel"></span>
+      <button id="nextBtn">الشهر التالي ▶</button>
+    </div>
+
+    <table id="dutyTable">
+      <thead>
+        <tr>
+          <th>الأسبوع</th>
+          <th>يوم الحراسة</th>
+          <th>التاريخ</th>
+          <th>اسم السائق</th>
+          <th>الإمضاء</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const daysArabic = ["الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة"];
+
+    // 👇 القوائم الخاصة بكل أسبوع كما طلبت
+    const weeklyDrivers = {
+      1: ["ايوب العمري","العوني الميلودي","المكي السعيدي","محمد السيتل","ايوب العمري"],
+      2: ["محمد السيتل","المكي السعيدي","العوني الميلودي","ايوب العمري","محمد السيتل"],
+      3: ["المكي السعيدي","محمد السيتل","ايوب العمري","العوني الميلودي","المكي السعيدي"],
+      4: ["العوني الميلودي","ايوب العمري","المكي السعيدي","محمد السيتل","العوني الميلودي"]
+    };
+
+    let viewYear, viewMonth;
+
+    function generateDutySchedule(year, month) {
+      const tbody = document.getElementById("tableBody");
+      tbody.innerHTML = "";
+
+      const current = new Date(year, month);
+      const monthLabel = new Intl.DateTimeFormat('ar', { month: 'long', year: 'numeric' }).format(current);
+      document.getElementById("monthLabel").textContent = monthLabel;
+
+      // إيجاد أول يوم اثنين في الشهر
+      let startDate = new Date(year, month, 1);
+      while (startDate.getDay() !== 1) startDate.setDate(startDate.getDate() + 1);
+
+      // حساب عدد الأسابيع (حتى 4 فقط)
+      const weeks = 4;
+
+      for (let week = 1; week <= weeks; week++) {
+        const drivers = weeklyDrivers[week];
+
+        for (let d = 0; d < 5; d++) {
+          const currentDay = new Date(startDate);
+          currentDay.setDate(startDate.getDate() + (week - 1) * 7 + d);
+          const dateStr = currentDay.toLocaleDateString('en');
+
+          const tr = document.createElement("tr");
+          if (d === 0) {
+            const tdWeek = document.createElement("td");
+            tdWeek.textContent = `الأسبوع ${week}`;
+            tdWeek.className = "week-title";
+            tdWeek.rowSpan = 5;
+            tr.appendChild(tdWeek);
+          }
+
+          const tdDay = document.createElement("td");
+          tdDay.textContent = daysArabic[d];
+          const tdDate = document.createElement("td");
+          tdDate.textContent = dateStr;
+          const tdDriver = document.createElement("td");
+          tdDriver.textContent = drivers[d];
+          const tdSign = document.createElement("td");
+          tdSign.textContent = "";
+
+          tr.appendChild(tdDay);
+          tr.appendChild(tdDate);
+          tr.appendChild(tdDriver);
+          tr.appendChild(tdSign);
+          tbody.appendChild(tr);
+        }
+      }
+    }
+
+    // التحكم في الشهور
+    function goToMonth(y, m) {
+      viewYear = y;
+      viewMonth = m;
+      generateDutySchedule(y, m);
+    }
+
+    document.getElementById("prevBtn").addEventListener("click", () => {
+      if (viewMonth === 0) {
+        viewMonth = 11;
+        viewYear--;
+      } else {
+        viewMonth--;
+      }
+      generateDutySchedule(viewYear, viewMonth);
+    });
+
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      if (viewMonth === 11) {
+        viewMonth = 0;
+        viewYear++;
+      } else {
+        viewMonth++;
+      }
+      generateDutySchedule(viewYear, viewMonth);
+    });
+
+    // تشغيل أولي
+    const now = new Date();
+    goToMonth(now.getFullYear(), now.getMonth());
+  </script>
+</body>
+</html>
