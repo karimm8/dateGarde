@@ -105,100 +105,100 @@
   </div>
 
   <script>
-    const daysArabic = ["الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة"];
+  const daysArabic = ["الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة"];
 
-    // 👇 القوائم الخاصة بكل أسبوع كما طلبت
-    const weeklyDrivers = {
-     
-      1: ["محمد السيتل","المكي السعيدي","العوني الميلودي","ايوب العمري","محمد السيتل"],
-      2: ["المكي السعيدي","محمد السيتل","ايوب العمري","العوني الميلودي","المكي السعيدي"],
-      3: ["العوني الميلودي","ايوب العمري","المكي السعيدي","محمد السيتل","العوني الميلودي"],
-      4: ["ايوب العمري","العوني الميلودي","المكي السعيدي","محمد السيتل","ايوب العمري"],
-    };
+  const weeklyDrivers = {
+    1: ["محمد السيتل","المكي السعيدي","العوني الميلودي","ايوب العمري","محمد السيتل"],
+    2: ["المكي السعيدي","محمد السيتل","ايوب العمري","العوني الميلودي","المكي السعيدي"],
+    3: ["العوني الميلودي","ايوب العمري","المكي السعيدي","محمد السيتل","العوني الميلودي"],
+    4: ["ايوب العمري","العوني الميلودي","المكي السعيدي","محمد السيتل","ايوب العمري"],
+  };
 
-    let viewYear, viewMonth;
+  let viewYear, viewMonth;
 
-    function generateDutySchedule(year, month) {
-      const tbody = document.getElementById("tableBody");
-      tbody.innerHTML = "";
+  function generateDutySchedule(year, month) {
+    const tbody = document.getElementById("tableBody");
+    tbody.innerHTML = "";
 
-      const current = new Date(year, month);
-      const monthLabel = new Intl.DateTimeFormat('ar', { month: 'long', year: 'numeric' }).format(current);
-      document.getElementById("monthLabel").textContent = monthLabel;
+    const current = new Date(year, month);
+    const monthLabel = new Intl.DateTimeFormat('ar', { month: 'long', year: 'numeric' }).format(current);
+    document.getElementById("monthLabel").textContent = monthLabel;
 
-      // إيجاد أول يوم اثنين في الشهر
-      let startDate = new Date(year,month, 1);
-      
-      while (startDate.getDay() !== 1) startDate.setDate(startDate.getDate() + 1);
+    let startDate = new Date(year, month, 1);
+    while (startDate.getDay() !== 1) startDate.setDate(startDate.getDate() + 1);
 
-      // حساب عدد الأسابيع (حتى 4 فقط)
-      const weeks = 4;
+    const weeks = 4;
 
-      for (let week = 1; week <= weeks; week++) {
-        const drivers = weeklyDrivers[week];
+    for (let week = 1; week <= weeks; week++) {
+      const drivers = weeklyDrivers[week];
 
-        for (let d = 0; d < 5; d++) {
-          const currentDay = new Date(startDate);
-          currentDay.setDate(startDate.getDate() + (week - 1) * 7 + d);
-          const dateStr = currentDay.toLocaleDateString('en');
+      for (let d = 0; d < 5; d++) {
+        const currentDay = new Date(startDate);
+        currentDay.setDate(startDate.getDate() + (week - 1) * 7 + d);
 
-          const tr = document.createElement("tr");
-          if (d === 0) {
-            const tdWeek = document.createElement("td");
-            tdWeek.textContent = `الأسبوع ${week}`;
-            tdWeek.className = "week-title";
-            tdWeek.rowSpan = 5;
-            tr.appendChild(tdWeek);
-          }
+        // ✳️ هنا التعديل: قلبنا اليوم والشهر
+        const day = currentDay.getDate().toString().padStart(2, "0");
+        const monthNum = (currentDay.getMonth() + 1).toString().padStart(2, "0");
+        const yearNum = currentDay.getFullYear();
+        const dateStr = `${day}/${monthNum}/${yearNum}`; // ← الشهر/اليوم/السنة
 
-          const tdDay = document.createElement("td");
-          tdDay.textContent = daysArabic[d];
-          const tdDate = document.createElement("td");
-          tdDate.textContent = dateStr;
-          const tdDriver = document.createElement("td");
-          tdDriver.textContent = drivers[d];
-          const tdSign = document.createElement("td");
-          tdSign.textContent = "";
-
-          tr.appendChild(tdDay);
-          tr.appendChild(tdDate);
-          tr.appendChild(tdDriver);
-          tr.appendChild(tdSign);
-          tbody.appendChild(tr);
+        const tr = document.createElement("tr");
+        if (d === 0) {
+          const tdWeek = document.createElement("td");
+          tdWeek.textContent = `الأسبوع ${week}`;
+          tdWeek.className = "week-title";
+          tdWeek.rowSpan = 5;
+          tr.appendChild(tdWeek);
         }
+
+        const tdDay = document.createElement("td");
+        tdDay.textContent = daysArabic[d];
+        const tdDate = document.createElement("td");
+        tdDate.textContent = dateStr;
+        const tdDriver = document.createElement("td");
+        tdDriver.textContent = drivers[d];
+        const tdSign = document.createElement("td");
+        tdSign.textContent = "";
+
+        tr.appendChild(tdDay);
+        tr.appendChild(tdDate);
+        tr.appendChild(tdDriver);
+        tr.appendChild(tdSign);
+        tbody.appendChild(tr);
       }
     }
+  }
 
-    // التحكم في الشهور
-    function goToMonth(y, m) {
-      viewYear = y;
-      viewMonth = m;
-      generateDutySchedule(y, m);
+  function goToMonth(y, m) {
+    viewYear = y;
+    viewMonth = m;
+    generateDutySchedule(y, m);
+  }
+
+  document.getElementById("prevBtn").addEventListener("click", () => {
+    if (viewMonth === 0) {
+      viewMonth = 11;
+      viewYear--;
+    } else {
+      viewMonth--;
     }
+    generateDutySchedule(viewYear, viewMonth);
+  });
 
-    document.getElementById("prevBtn").addEventListener("click", () => {
-      if (viewMonth === 0) {
-        viewMonth = 11;
-        viewYear--;
-      } else {
-        viewMonth--;
-      }
-      generateDutySchedule(viewYear, viewMonth);
-    });
+  document.getElementById("nextBtn").addEventListener("click", () => {
+    if (viewMonth === 11) {
+      viewMonth = 0;
+      viewYear++;
+    } else {
+      viewMonth++;
+    }
+    generateDutySchedule(viewYear, viewMonth);
+  });
 
-    document.getElementById("nextBtn").addEventListener("click", () => {
-      if (viewMonth === 11) {
-        viewMonth = 0;
-        viewYear++;
-      } else {
-        viewMonth++;
-      }
-      generateDutySchedule(viewYear, viewMonth);
-    });
+  const now = new Date();
+  goToMonth(now.getFullYear(), now.getMonth());
+</script>
 
-    // تشغيل أولي
-    const now = new Date();
-    goToMonth(now.getFullYear(), now.getMonth());
-  </script>
+
 </body>
 </html>
