@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="rtl">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <title>جدول الحراسة الخاص بالسائقين</title>
@@ -77,6 +77,12 @@
       font-size: 1.2rem;
       color: #1e3a8a;
     }
+    /* 🌟 تنسيق اليوم الحالي */
+    .today {
+      background-color: #fff8c5 !important;
+      font-weight: bold;
+      color: #000;
+    }
   </style>
 </head>
 <body>
@@ -128,6 +134,8 @@
     while (startDate.getDay() !== 1) startDate.setDate(startDate.getDate() + 1);
 
     const weeks = 4;
+    const today = new Date();
+    const todayStr = `${today.getDate().toString().padStart(2, "0")}/${(today.getMonth()+1).toString().padStart(2, "0")}/${today.getFullYear()}`;
 
     for (let week = 1; week <= weeks; week++) {
       const drivers = weeklyDrivers[week];
@@ -136,13 +144,13 @@
         const currentDay = new Date(startDate);
         currentDay.setDate(startDate.getDate() + (week - 1) * 7 + d);
 
-        // ✳️ هنا التعديل: قلبنا اليوم والشهر
         const day = currentDay.getDate().toString().padStart(2, "0");
         const monthNum = (currentDay.getMonth() + 1).toString().padStart(2, "0");
         const yearNum = currentDay.getFullYear();
-        const dateStr = `${day}/${monthNum}/${yearNum}`; // ← الشهر/اليوم/السنة
+        const dateStr = `${day}/${monthNum}/${yearNum}`;
 
         const tr = document.createElement("tr");
+
         if (d === 0) {
           const tdWeek = document.createElement("td");
           tdWeek.textContent = `الأسبوع ${week}`;
@@ -153,12 +161,22 @@
 
         const tdDay = document.createElement("td");
         tdDay.textContent = daysArabic[d];
+
         const tdDate = document.createElement("td");
         tdDate.textContent = dateStr;
+
         const tdDriver = document.createElement("td");
         tdDriver.textContent = drivers[d];
+
         const tdSign = document.createElement("td");
         tdSign.textContent = "";
+
+        // 🌟 إذا كان هذا التاريخ هو اليوم الحالي، نغير لونه
+        if (dateStr === todayStr) {
+          tdDate.classList.add("today");
+          tdDay.classList.add("today");
+          tdDriver.classList.add("today");
+        }
 
         tr.appendChild(tdDay);
         tr.appendChild(tdDate);
@@ -198,7 +216,6 @@
   const now = new Date();
   goToMonth(now.getFullYear(), now.getMonth());
 </script>
-
 
 </body>
 </html>
