@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <title>جدول الحراسة الخاص بالسائقين</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <style>
     body {
       font-family: "Cairo", sans-serif;
@@ -50,9 +49,13 @@
     button:hover {
       background: #1e40af;
     }
+    .today {
+      background-color: #fff8c5;
+      font-weight: bold;
+      color: green;
+    }
   </style>
 </head>
-
 <body>
 
 <div>
@@ -79,13 +82,11 @@
 </div>
 
 <script>
-const daysArabic = ["الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة"];
-
 const weeklyDrivers = {
   1: ["محمد السيتل","المكي السعيدي","احمد الفراعي","ايوب العمري","محمد السيتل"],
   2: ["المكي السعيدي","محمد السيتل","ايوب العمري","احمد الفراعي","المكي السعيدي"],
-  3: ["احمد الفراعي","ايوب العمري","المكي السعيدي","محمد السيتل","احمد الفراعي"],
-  4: ["ايوب العمري","احمد الفراعي","المكي السعيدي","محمد السيتل","ايوب العمري"]
+  3: ["احمد الفراعي","ايوب العمري","المكي السيتل","محمد السيتل","احمد الفراعي"],
+  4: ["ايوب العمري","احمد الفراعي","المكي السيتل","محمد السيتل","ايوب العمري"]
 };
 
 let viewYear, viewMonth;
@@ -94,9 +95,11 @@ function generateDutySchedule(year, month) {
   const tbody = document.getElementById("tableBody");
   tbody.innerHTML = "";
 
+  const today = new Date();
+  const todayStr = `${today.getDate().toString().padStart(2,"0")}/${(today.getMonth()+1).toString().padStart(2,"0")}/${today.getFullYear()}`;
+
   document.getElementById("monthLabel").textContent =
-    new Intl.DateTimeFormat("ar", { month: "long", year: "numeric" })
-    .format(new Date(year, month));
+    new Intl.DateTimeFormat("ar", { month: "long", year: "numeric" }).format(new Date(year, month));
 
   const firstDay = new Date(year, month, 1);
   const lastDay  = new Date(year, month + 1, 0);
@@ -105,20 +108,16 @@ function generateDutySchedule(year, month) {
   let day = new Date(firstDay);
 
   while (day <= lastDay) {
-    const jsDay = day.getDay(); // 1=الاثنين … 5=الجمعة
+    const jsDay = day.getDay(); // 0=الأحد … 6=السبت
 
-    // ❌ لا نعرض السبت والأحد
-    if (jsDay >= 1 && jsDay <= 5) {
-
-      // بداية أسبوع جديد
-      if (jsDay === 1 || weekNumber === 0) {
-  weekNumber++;
-}
-
+    // نعرض فقط الاثنين → الجمعة
+    if(jsDay >= 1 && jsDay <= 5){
+      
+      if(weekNumber === 0 || jsDay === 1) weekNumber++;
 
       const tr = document.createElement("tr");
 
-      if (jsDay === 1) {
+      if(jsDay === 1){
         const tdWeek = document.createElement("td");
         tdWeek.textContent = `الأسبوع ${weekNumber}`;
         tdWeek.className = "week-title";
@@ -127,21 +126,24 @@ function generateDutySchedule(year, month) {
       }
 
       const tdDay = document.createElement("td");
-      tdDay.textContent = daysArabic[jsDay - 1];
+      tdDay.textContent = new Intl.DateTimeFormat("ar", { weekday: "long" }).format(day);
 
       const tdDate = document.createElement("td");
-      tdDate.textContent =
-        day.getDate().toString().padStart(2,"0") + "/" +
-        (month+1).toString().padStart(2,"0") + "/" +
-        year;
+      const dateStr = `${day.getDate().toString().padStart(2,"0")}/${(day.getMonth()+1).toString().padStart(2,"0")}/${day.getFullYear()}`;
+      tdDate.textContent = dateStr;
 
       const tdDriver = document.createElement("td");
-      tdDriver.textContent =
-        weeklyDrivers[((weekNumber - 1) % 4) + 1][jsDay - 1];
+      tdDriver.textContent = weeklyDrivers[((weekNumber-1)%4)+1][jsDay-1];
 
       const tdSign = document.createElement("td");
 
       tr.append(tdDay, tdDate, tdDriver, tdSign);
+
+      // تمييز اليوم الحالي
+      if(dateStr === todayStr){
+        tr.classList.add("today");
+      }
+
       tbody.appendChild(tr);
     }
 
@@ -152,17 +154,17 @@ function generateDutySchedule(year, month) {
 // أزرار التنقل
 document.getElementById("prevBtn").onclick = () => {
   viewMonth--;
-  if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+  if(viewMonth < 0){ viewMonth = 11; viewYear--; }
   generateDutySchedule(viewYear, viewMonth);
 };
 
 document.getElementById("nextBtn").onclick = () => {
   viewMonth++;
-  if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+  if(viewMonth > 11){ viewMonth = 0; viewYear++; }
   generateDutySchedule(viewYear, viewMonth);
 };
 
-// تحميل الشهر الحالي
+// تحميل الشهر الحالي عند البداية
 const now = new Date();
 viewYear = now.getFullYear();
 viewMonth = now.getMonth();
